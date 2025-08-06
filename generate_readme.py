@@ -4,21 +4,26 @@ import re
 LEETCODE_URL = "https://leetcode.com/problems/"
 SUPPORTED_EXTENSIONS = ['.py', '.cpp', '.java', '.js']
 
-files = [f for f in os.listdir() if os.path.isfile(f) and os.path.splitext(f)[1] in SUPPORTED_EXTENSIONS]
+# Only keep files matching the pattern: number.slug.extension
+pattern = re.compile(r'^(\d+)\.(.+)\.(py|cpp|java|js)$')
+
+# Filter and collect matching files
+files = [f for f in os.listdir() if os.path.isfile(f) and pattern.match(f)]
+
+# Now sort safely using the extracted number
+files_sorted = sorted(files, key=lambda x: int(pattern.match(x).group(1)))
 
 table_lines = []
 table_lines.append("| # | Problem | Solution | Language |")
 table_lines.append("|---|---------|----------|----------|")
 
-for filename in sorted(files, key=lambda x: int(re.match(r'^(\d+)', x).group(1))):
-    match = re.match(r'^(\d+)\.(.+)\.(py|cpp|java|js)$', filename)
-    if not match:
-        continue
+language_map = {'py': 'Python', 'cpp': 'C++', 'java': 'Java', 'js': 'JavaScript'}
 
+for filename in files_sorted:
+    match = pattern.match(filename)
     problem_number = int(match.group(1))
     problem_slug = match.group(2).replace('_', '-')
     problem_title = match.group(2).replace('-', ' ').title()
-    language_map = {'py': 'Python', 'cpp': 'C++', 'java': 'Java', 'js': 'JavaScript'}
     ext = match.group(3)
     language = language_map.get(ext, ext)
 
